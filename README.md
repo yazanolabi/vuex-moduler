@@ -1,13 +1,13 @@
 # Vuex Moduler
 
-Foobar is a Python library for dealing with word pluralization.
+Vuex moduler to create automatic modules with its actions,getters,mutations with simple configurations.
 
 ## Installation
 
 Use the package manager [npm](https://nodejs.org/en/download/) to install vuex-moduler.
 
 ```bash
-npm install foobar
+npm i @yazanolabi/vuex-moduler
 ```
 
 ## Usage

@@ -1,0 +1,14 @@
+{
+	"name": "@yazanolabi/vuex-moduler",
+	"version": "0.1.1",
+	"description": "Vuex moduler to create automatic modules with its actions,getters,mutations with simple configurations",
+	"license": "MIT",
+	"repository": "yazanolabi/vuex-moduler",
+	"main": "index.js",
+	"keywords": [
+		"vuex-moduler",
+		"npm",
+		"package",
+		"vuex"
+	]
+}

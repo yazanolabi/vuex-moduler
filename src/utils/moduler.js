@@ -1,12 +1,11 @@
-module.exports = function moduler({
+export default ({
 	axios,
 	api = "",
-	files = false,
 	actions = {},
 	getters = {},
 	mutations = {},
 	state = {},
-} = {}) {
+} = {}) => {
 	return {
 		namespaced: true,
 		actions: {
@@ -44,9 +43,6 @@ module.exports = function moduler({
 
 			create: async ({ commit }, data) => {
 				return await new Promise((resolve, reject) => {
-					if (files) {
-						data = objectToForm(data);
-					}
 					axios
 						.post(api, data)
 						.then((res) => {
@@ -60,15 +56,11 @@ module.exports = function moduler({
 			},
 
 			edit: async ({ commit }, data) => {
-				if (files) {
-					let formData = objectToForm(data);
-					formData.append("_method", "PATCH");
-				}
 				return await new Promise((resolve, reject) => {
 					axios({
-						method: files ? "post" : "put",
+						method: "put",
 						url: `${api}/${data.id}`,
-						data: files ? formData : data,
+						data,
 					})
 						.then((res) => {
 							commit("update", res.data);
@@ -97,7 +89,7 @@ module.exports = function moduler({
 			disable: async ({ commit }, id) => {
 				return await new Promise((resolve, reject) => {
 					axios
-						.post(`${api}/disable?id=${id}`)
+						.post(`${api}/${id}/disable`)
 						.then((res) => {
 							commit("disable", id);
 							resolve(res);
@@ -111,7 +103,7 @@ module.exports = function moduler({
 			activate: async ({ commit }, id) => {
 				return await new Promise((resolve, reject) => {
 					axios
-						.post(`${api}/activate?id=${id}`)
+						.post(`${api}/${id}/activate`)
 						.then((res) => {
 							commit("activate", id);
 							resolve(res);
@@ -122,7 +114,7 @@ module.exports = function moduler({
 				});
 			},
 
-			exportExcel: async ({ commit }, data) => {
+			exportExcel: async (data) => {
 				return await new Promise((resolve, reject) => {
 					axios
 						.get(`${api}/export/excel`, {
@@ -160,54 +152,51 @@ module.exports = function moduler({
 			...getters,
 		},
 		mutations: {
-			fetch: (state, res) => {
-				state.paginated = res.data.data ? res.data.data : res.data;
+			fetch: (state, { data }) => {
+				state.paginated = data;
 			},
 
-			fetchInfinite: (state, res) => {
-				state.infinite = [
-					...state.infinite,
-					...(res.data.data ? res.data.data : res.data),
-				];
+			fetchInfinite: (state, { data }) => {
+				state.infinite = [...state.infinite, ...data];
 			},
 
-			fetchAll: (state, res) => {
-				state.all = res.data.data ? res.data.data : res.data;
+			fetchAll: (state, { data }) => {
+				state.all = data;
 			},
 
-			fetchOne: (state, res) => {
-				state.item = res.data.data ? res.data.data : res.data;
+			fetchOne: (state, { data }) => {
+				state.item = data;
 			},
 
-			add: (state, res) => {
-				state.paginated.push(res.data.data);
-				state.infinite.unshift(res.data.data);
-				state.all.push(res.data.data);
+			add: (state, { data }) => {
+				state.paginated.push(data);
+				state.infinite.unshift(data);
+				state.all.push(data);
 			},
 
-			update: (state, res) => {
-				const find = (element) => element.id == res.data.data.id;
+			update: (state, { data }) => {
+				const find = (element) => element.id == data.id;
 				const index = state.paginated.findIndex(find);
-				Vue.set(state.paginated, index, res.data.data);
+				state.paginated[index] = Object.assign({}, data);
 				const index2 = state.infinite.findIndex(find);
-				Vue.set(state.infinite, index2, res.data.data);
+				state.infinite[index2] = Object.assign({}, data);
 				const index3 = state.all.findIndex(find);
-				Vue.set(state.all, index3, res.data.data);
-				if (state.item.id == res.data.data.id) {
-					state.item = Object.assign({}, res.data.data);
+				state.all[index3] = Object.assign({}, data);
+				if (state.item.id == data.id) {
+					state.item = Object.assign({}, data);
 				}
 			},
 
 			disable: (state, id) => {
 				const find = (element) => element.id == id;
 				const index = state.paginated.findIndex(find);
-				Vue.set(state.paginated[index], "active", 0);
+				state.paginated[index].active = 0;
 			},
 
 			activate: (state, id) => {
 				const find = (element) => element.id == id;
 				const index = state.paginated.findIndex(find);
-				Vue.set(state.paginated[index], "active", 1);
+				state.paginated[index].active = 1;
 			},
 
 			remove: (state, id) => {
